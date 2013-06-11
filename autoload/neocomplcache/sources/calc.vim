@@ -1,5 +1,5 @@
 let s:source = {
-      \ 'name': 'calc',
+      \ 'name': '[calc]',
       \ 'kind': 'complfunc',
       \ }
 
