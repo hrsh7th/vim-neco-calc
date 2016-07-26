@@ -11,31 +11,11 @@ function! s:source.finalize()
 endfunction
 
 function! s:source.get_keyword_pos(cur_text)
-  return match(a:cur_text, '\(\d\+\(\.\d\+\)\=\|[\(]\)\(\d\+\(\.\d\+\)\=\|\s\|[\(\)\+\-\*\/\%]\)\+$')
+  return necocalc#get_complete_position(a:cur_text)
 endfunction
 
 function! s:source.get_complete_words(cur_keyword_pos, cur_keyword_str)
-  " trim.
-  let cur_keyword_str = substitute(a:cur_keyword_str, '\s\+$', '', 'g')
-
-  " doesn't process if digit only.
-  if cur_keyword_str =~# '^\d\+\(\.\d\+\)\=$'
-      return []
-  endif
-
-  " convert int to float.
-  let code = substitute(cur_keyword_str, '\(\d\+\(\.\d\+\)\=\)', 'str2float("\1")', 'g')
-
-  " try calc.
-  let keywords = []
-  try
-    let result = eval(code)
-    call add(keywords, {'word': substitute(cur_keyword_str. ' = '. printf('%g', result), '\.0\+$', '', 'g'), 'menu': 'calc'})
-    call add(keywords, {'word': substitute(printf('%g', result), '\.0\+$', '', 'g'), 'menu': 'calc'})
-  catch
-  endtry
-
-  return keywords
+  return necocalc#gather_candidates(cur_keyword_str)
 endfunction
 
 function! neocomplcache#sources#calc#define()
