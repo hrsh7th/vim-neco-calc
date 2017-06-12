@@ -4,8 +4,6 @@
 #=============================================================================
 
 from .base import Base
-import deoplete.util
-import re
 
 class Source(Base):
     def __init__(self, vim):
@@ -13,7 +11,6 @@ class Source(Base):
 
         self.name = 'calc'
         self.mark = '[calc]'
-        self.is_bytepos = True
         self.rank = 500
 
     def get_complete_position(self, context):
