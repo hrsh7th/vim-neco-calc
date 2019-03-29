@@ -1,9 +1,5 @@
-#=============================================================================
-# FILE: calc.py
-# AUTHOR: hrsh7th
-#=============================================================================
-
-from .base import Base
+import re
+from deoplete.source.base import Base
 
 class Source(Base):
     def __init__(self, vim):
@@ -11,11 +7,34 @@ class Source(Base):
 
         self.name = 'calc'
         self.mark = '[calc]'
-        self.rank = 500
-
-    def get_complete_position(self, context):
-        return self.vim.call('necocalc#get_complete_position', context['input'])
+        self.rank = 10
+        self.vars = {}
+        self.input_pattern = self.regex()
 
     def gather_candidates(self, context):
-        return self.vim.call('necocalc#gather_candidates', context['complete_str'])
+        candidates = []
+        try:
+            if re.match(r'^\s*\d+(\.\d+)?\s*$', context['input']):
+                return []
+            output = str(eval(context['input']))
+            candidates += [{
+                'word': ' = {}'.format(output),
+                'abbr': '{} = {}'.format(context['input'].strip(), output),
+                'dup': 1
+            }]
+            candidates += [{
+                'word': ' = {}'.format(output),
+                'abbr': output,
+                'dup': 1
+            }]
+        except:
+            pass
+        return candidates
+
+    def regex(self):
+        parts = []
+        parts += [re.escape(x) for x in ['+', '*', '/', '-', '%']]
+        parts += ['\d+(\.\d+)?']
+        parts += [re.escape(x) for x in ['(', ')']]
+        return '(' + '|'.join(parts) + ')'
 
