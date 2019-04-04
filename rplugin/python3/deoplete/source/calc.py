@@ -10,16 +10,17 @@ class Source(Base):
         self.rank = 10
         self.vars = {}
         self.input_pattern = self.regex()
+        self.is_volatile = True
+        self.min_pattern_length = 3
 
     def gather_candidates(self, context):
         candidates = []
         try:
-            if re.match(r'^\s*\d+(\.\d+)?\s*$', context['input']):
-                return []
-            output = str(eval(context['input']))
+            calculates = re.findall(self.regex(), context['input'])
+            output = str(eval(calculates[0]))
             candidates += [{
                 'word': ' = {}'.format(output),
-                'abbr': '{} = {}'.format(context['input'].strip(), output),
+                'abbr': '{} = {}'.format(calculates[0].strip(), output),
                 'dup': 1
             }]
             candidates += [{
@@ -33,8 +34,9 @@ class Source(Base):
 
     def regex(self):
         parts = []
+        parts += [r'\d+(?:\.\d+)?']
+        parts += [r'\s*']
         parts += [re.escape(x) for x in ['+', '*', '/', '-', '%']]
-        parts += ['\d+(\.\d+)?']
         parts += [re.escape(x) for x in ['(', ')']]
-        return '(' + '|'.join(parts) + ')'
-
+        regex = r'(?:' + r'|'.join(parts) + r')+$'
+        return regex
